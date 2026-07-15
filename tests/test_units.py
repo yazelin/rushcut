@@ -117,3 +117,17 @@ def test_build_judge_request():
     req = build_judge_request(segs, "腳本", [(2.0, 3.0)])
     assert req["segments"][0] == {"i": 0, "start": 0.0, "end": 1.23, "text": "你好"}
     assert req["silences"] == [[2.0, 3.0]]
+
+
+# --- cut.merge_drops ---
+
+def test_merge_drops_overlap_and_minkeep():
+    from ytp.cut import merge_drops
+    # 重疊 drop 合併
+    keeps = merge_drops([(1.0, 3.0), (2.5, 5.0)], duration=10.0, min_keep_sec=0.2)
+    assert keeps == [(0.0, 1.0), (5.0, 10.0)]
+    # 兩刀之間 keep 太短 → 併掉
+    keeps = merge_drops([(1.0, 3.0), (3.1, 5.0)], duration=10.0, min_keep_sec=0.2)
+    assert keeps == [(0.0, 1.0), (5.0, 10.0)]
+    # 無 drop 全保留
+    assert merge_drops([], 10.0, 0.2) == [(0.0, 10.0)]
