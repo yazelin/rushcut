@@ -90,3 +90,30 @@ def test_write_srt_format(tmp_path):
     assert "00:00:00,000 --> 00:00:01,500" in content
     assert "00:01:01,250 --> 00:01:02,000" in content
     assert content.startswith("1\n")
+
+
+# --- judge ---
+
+def test_parse_cut_plan_tolerates_fences():
+    from ytp.judge import parse_cut_plan
+    raw = '好的,以下是結果:\n```json\n[{"start": 1.0, "end": 2.5, "reason": "重講"}]\n```'
+    plan = parse_cut_plan(raw)
+    assert plan == [{"start": 1.0, "end": 2.5, "reason": "重講"}]
+
+
+def test_parse_cut_plan_empty_and_invalid():
+    from ytp.judge import parse_cut_plan
+    assert parse_cut_plan("[]") == []
+    import pytest as _pt
+    with _pt.raises(ValueError):
+        parse_cut_plan("完全沒有 JSON")
+    with _pt.raises(ValueError):
+        parse_cut_plan('[{"start": 1.0}]')
+
+
+def test_build_judge_request():
+    from ytp.judge import build_judge_request
+    segs = [{"start": 0.0, "end": 1.234, "text": "你好", "words": []}]
+    req = build_judge_request(segs, "腳本", [(2.0, 3.0)])
+    assert req["segments"][0] == {"i": 0, "start": 0.0, "end": 1.23, "text": "你好"}
+    assert req["silences"] == [[2.0, 3.0]]
