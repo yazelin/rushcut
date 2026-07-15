@@ -65,3 +65,28 @@ def test_silences_to_drops_padding_and_edges():
     assert silences_to_drops([(1.0, 1.5)], keep_silence_sec=0.3, duration=10) == []
     # 片頭靜音從 0 開始剪
     assert silences_to_drops([(0.0, 3.0)], keep_silence_sec=0.3, duration=10) == [(0.0, 2.7)]
+
+
+# --- transcribe 純函式 ---
+
+def test_apply_replacements():
+    from ytp.transcribe import apply_replacements
+    assert apply_replacements("杜哥說銷售業", {"杜哥": "度哥", "銷售業": "銷售頁"}) == "度哥說銷售頁"
+
+
+def test_to_traditional():
+    from ytp.transcribe import to_traditional
+    out = to_traditional("这个视频")
+    assert "這" in out  # 至少繁化
+
+
+def test_write_srt_format(tmp_path):
+    from ytp.transcribe import write_srt
+    segs = [{"start": 0.0, "end": 1.5, "text": "你好", "words": []},
+            {"start": 61.25, "end": 62.0, "text": "再見", "words": []}]
+    out = tmp_path / "s.srt"
+    write_srt(segs, out)
+    content = out.read_text()
+    assert "00:00:00,000 --> 00:00:01,500" in content
+    assert "00:01:01,250 --> 00:01:02,000" in content
+    assert content.startswith("1\n")
