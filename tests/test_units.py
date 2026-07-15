@@ -131,3 +131,14 @@ def test_merge_drops_overlap_and_minkeep():
     assert keeps == [(0.0, 1.0), (5.0, 10.0)]
     # 無 drop 全保留
     assert merge_drops([], 10.0, 0.2) == [(0.0, 10.0)]
+
+
+# --- pack ---
+
+def test_pack_extract_json():
+    from ytp.pack import _extract_json
+    raw = '{"titles": ["a"], "description": "d", "social": "s", "seo": ["k"]}'
+    assert _extract_json(raw)["titles"] == ["a"]
+    import pytest as _pt
+    with _pt.raises(ValueError):
+        _extract_json('{"titles": ["a"]}')
