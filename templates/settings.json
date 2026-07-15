@@ -1,0 +1,7 @@
+{
+  "model_size": "large-v3",
+  "language": "zh",
+  "silence": { "noise_db": -30, "min_silence_sec": 0.45, "keep_silence_sec": 0.3 },
+  "cut": { "min_keep_sec": 0.2, "crf": 18, "preset": "veryfast" },
+  "shorts": { "width": 1080, "height": 1920 }
+}
